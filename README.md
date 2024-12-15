@@ -324,139 +324,263 @@ ORDER BY f.title ASC;
 32. Obtener todos los actores y mostrar las películas en las que han actuado, incluso si algunos actores no han actuado en ninguna película.
 
 ```SQL
-
+SELECT CONCAT(a.first_name, ' ', a.last_name), f.title 
+FROM actor AS a
+LEFT JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+LEFT JOIN film AS f ON f.film_id = fa.film_id;
 ```
 
 33. Obtener todas las películas que tenemos y todos los registros de alquiler.
 
 ```SQL
-
+SELECT f.title AS "Titulo", i.inventory_id AS "Nº_Copia", r.rental_date AS "Fecha_Alquiler"
+FROM film AS f
+LEFT JOIN inventory AS i ON i.film_id = f.film_id 
+LEFT JOIN rental AS r ON r.inventory_id = i.inventory_id
+ORDER BY f.title, i.inventory_id ASC;
 ```
 
 34. Encuentra los 5 clientes que más dinero se hayan gastado con nosotros.
 
 ```SQL
-
+SELECT CONCAT(c.first_name, ' ', c.last_name) AS "Cliente"
+FROM customer AS c
+JOIN payment AS p ON p.customer_id = c.customer_id 
+ORDER BY p.amount DESC
+LIMIT 5;
 ```
 
 35. Selecciona todos los actores cuyo primer nombre es 'Johnny'.
 
 ```SQL
-
+SELECT CONCAT(first_name, ' ', last_name)
+FROM actor
+WHERE first_name = 'JOHNNY';
 ```
 
 36. Renombra la columna “first_name” como Nombre y “last_name” como Apellido.
 
 ```SQL
-
+SELECT first_name AS "Nombre", last_name AS "Apellido"
+FROM actor;
 ```
 
 37. Encuentra el ID del actor más bajo y más alto en la tabla actor.
 
 ```SQL
-
+SELECT CONCAT(first_name, ' ', last_name)
+FROM actor
+WHERE actor_id = (
+	SELECT MAX(actor_id)
+	FROM actor
+) OR actor_id = (
+	SELECT min(actor_id)
+	FROM actor
+);
 ```
 
 38. Cuenta cuántos actores hay en la tabla “actor”.
 
 ```SQL
-
+SELECT COUNT(actor_id) AS "Total_Actores"
+FROM actor;
 ```
 
 39. Selecciona todos los actores y ordénalos por apellido en orden ascendente.
 
 ```SQL
-
+SELECT CONCAT(last_name, ', ', first_name) AS "Apellido_Nombre"
+FROM actor
+ORDER BY last_name ASC;
 ```
 
 40. Selecciona las primeras 5 películas de la tabla “film”.
 
 ```SQL
-
+SELECT title 
+FROM film
+ORDER BY film_id ASC
+LIMIT 5;
 ```
 
 41. Agrupa los actores por su nombre y cuenta cuántos actores tienen el mismo nombre. ¿Cuál es el nombre más repetido?
 
 ```SQL
+SELECT first_name, COUNT(first_name) AS "Total_nombre"
+FROM actor
+GROUP BY first_name 
+ORDER BY "Total_nombre" DESC;
 
+-- Los nombres más repeditos son KENNETH, PENELOPE y JULIA.
 ```
 
 42. Encuentra todos los alquileres y los nombres de los clientes que los realizaron.
 
 ```SQL
-
+SELECT CONCAT(c.first_name, ' ', last_name) AS "Cliente", f.title AS "Pelicula"
+FROM rental AS r 
+JOIN customer AS c ON c.customer_id = r.customer_id
+JOIN inventory AS i ON i.inventory_id = r.inventory_id
+JOIN film AS f ON f.film_id = i.film_id
+ORDER BY "Cliente";
 ```
 
 43. Muestra todos los clientes y sus alquileres si existen, incluyendo aquellos que no tienen alquileres.
 
 ```SQL
-
+SELECT CONCAT(c.first_name, ' ', last_name) AS "Cliente", f.title AS "Pelicula"
+FROM rental AS r 
+LEFT JOIN customer AS c ON c.customer_id = r.customer_id
+LEFT JOIN inventory AS i ON i.inventory_id = r.inventory_id
+LEFT JOIN film AS f ON f.film_id = i.film_id
+ORDER BY "Cliente";
 ```
 
 44. Realiza un CROSS JOIN entre las tablas film y category. ¿Aporta valor esta consulta? ¿Por qué? Deja después de la consulta la contestación.
 
 ```SQL
+SELECT f.title, c.name
+FROM film AS f
+CROSS JOIN category AS c;
 
+-- No considero aporte ningún valor. Te muestra todas las posibles combinaciones de categoría que podría tener una película, pero no considero aporte ningún tipo de información útil para el ánalisis conocer estas posibilidades.
 ```
 
 45. Encuentra los actores que han participado en películas de la categoría 'Action'.
 
 ```SQL
-
+SELECT CONCAT(a.first_name, ' ', a.last_name)
+FROM actor AS a
+	JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+	JOIN film AS f ON f.film_id = fa.film_id 
+	JOIN film_category AS fc ON fc.film_id = f.film_id 
+	JOIN category AS c ON c.category_id = fc.category_id 
+WHERE c.name = 'Action';
 ```
 
 46. Encuentra todos los actores que no han participado en películas.
 
 ```SQL
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor"
+FROM actor AS a
+WHERE NOT EXISTS (
+	SELECT 1
+	FROM film_actor AS fa 
+	WHERE fa.actor_id = a.actor_id 
+);
 
+-- No hay actores que no participen en ninguna pelicula
 ```
 
 47. Selecciona el nombre de los actores y la cantidad de películas en las que han participado.
 
 ```SQL
-
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor", COUNT(fa.film_id) AS "Peliculas"
+FROM actor AS a
+JOIN film_actor AS fa ON fa.actor_id = a.actor_id
+GROUP BY "Actor"
+ORDER BY "Peliculas" DESC;
 ```
 
 48. Crea una vista llamada “actor_num_peliculas” que muestre los nombres de los actores y el número de películas en las que han participado.
 
 ```SQL
+CREATE VIEW actor_num_peliculas AS
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor", COUNT(fa.film_id) AS "Peliculas"
+FROM actor AS a
+JOIN film_actor AS fa ON fa.actor_id = a.actor_id
+GROUP BY "Actor"
+ORDER BY "Peliculas" DESC;
 
+SELECT *
+FROM actor_num_peliculas;
 ```
 
 49. Calcula el número total de alquileres realizados por cada cliente.
 
 ```SQL
-
+SELECT CONCAT(c.first_name, ' ', c.last_name) AS "Cliente", COUNT(r.rental_id) AS "Total_Alquileres"
+FROM customer AS c 
+JOIN rental AS r ON r.customer_id = c.customer_id 
+GROUP BY "Cliente"
+ORDER BY "Total_Alquileres" DESC;
 ```
 
 50. Calcula la duración total de las películas en la categoría 'Action'.
 
 ```SQL
-
+SELECT c.name, COUNT(f.film_id)
+FROM category AS c 
+JOIN film_category AS fc ON fc.category_id = c.category_id 
+JOIN film AS f ON f.film_id = fc.film_id
+WHERE c.name = 'Action'
+GROUP BY c.name;
 ```
 
 51. Crea una tabla temporal llamada “cliente_rentas_temporal” para almacenar el total de alquileres por cliente.
 
 ```SQL
-
+WITH cliente_rentas_temporal AS (
+	SELECT CONCAT(c.first_name, ' ', c.last_name) AS "Cliente", COUNT(c.customer_id) AS "Alquileres"
+	FROM customer AS c 
+	INNER JOIN rental AS r ON r.customer_id = c.customer_id
+	GROUP BY "Cliente"
+)
+SELECT *
+FROM cliente_rentas_temporal
 ```
 
 52. Crea una tabla temporal llamada “peliculas_alquiladas” que almacene las películas que han sido alquiladas al menos 10 veces.
 
 ```SQL
-
+WITH alquiladas_total AS (
+	SELECT f.film_id, COUNT(r.rental_id) AS "Alquileres"
+	FROM film AS f 
+	JOIN inventory AS i ON i.film_id = f.film_id
+	JOIN rental AS r ON r.inventory_id = i.inventory_id
+	GROUP BY f.film_id
+),
+peliculas_alquiladas AS (
+	SELECT film_id, "Alquileres"
+	FROM alquiladas_total
+	WHERE "Alquileres" >= 10
+)
+SELECT f.title 
+FROM film AS f
+INNER JOIN peliculas_alquiladas ON f.film_id = peliculas_alquiladas.film_id;
 ```
 
 53. Encuentra el título de las películas que han sido alquiladas por el cliente con el nombre ‘Tammy Sanders’ y que aún no se han devuelto. Ordena los resultados alfabéticamente por título de película.
 
 ```SQL
-
+SELECT CONCAT(c.first_name, ' ', c.last_name) AS "Cliente", f.title, r.rental_date, r.return_date 
+FROM film AS f
+JOIN inventory AS i ON i.film_id = f.film_id 
+JOIN rental AS r ON r.inventory_id = i.inventory_id 
+JOIN customer AS c ON c.customer_id = r.customer_id
+WHERE c.first_name = 'TAMMY' 
+	AND c.last_name = 'SANDERS' 
+	AND r.return_date IS NULL;
 ```
 
 54. Encuentra los nombres de los actores que han actuado en al menos una película que pertenece a la categoría ‘Sci-Fi’. Ordena los resultados alfabéticamente por apellido.
 
 ```SQL
-
+WITH peliculas_scifi AS(
+	SELECT f.title, c.name
+	FROM film AS f
+	INNER JOIN film_category AS fc ON fc.film_id = f.film_id
+	INNER JOIN category AS c ON c.category_id = fc.category_id
+	WHERE c.name = 'Sci-Fi'
+), actores_peliculas AS (
+	SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor", f.title
+	FROM actor AS a 
+	INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id
+	INNER JOIN film AS f ON f.film_id = fa.film_id
+)
+SELECT "Actor"
+FROM actores_peliculas AS ap
+INNER JOIN peliculas_scifi AS ps ON ap.title = ps.title;
 ```
 
 
