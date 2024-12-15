@@ -260,41 +260,65 @@ GROUP BY MONTH;
 
 ```SQL
 SELECT 
-	SUM(amount) AS Total,
-	ROUND(AVG(amount),2) AS Promedio,
-	ROUND(STDDEV(amount),2) AS Desviacion_Estandar,
-	ROUND(VARIANCE(amount),2) AS Varianza
+	SUM(amount) AS "Total",
+	ROUND(AVG(amount),2) AS "Promedio",
+	ROUND(STDDEV(amount),2) AS "Desviacion_Estandar",
+	ROUND(VARIANCE(amount),2) AS "Varianza"
 FROM payment;
 ```
 
 27. ¿Qué películas se alquilan por encima del precio medio?
 
 ```SQL
-
+SELECT title, p.amount 
+FROM film AS f
+INNER JOIN inventory AS i ON f.film_id = i.film_id 
+INNER JOIN rental AS r ON r.inventory_id = i.inventory_id
+INNER JOIN payment AS p ON p.rental_id = r.rental_id 
+WHERE p.amount > (
+	SELECT ROUND(AVG(amount),2) AS "Promedio"
+	FROM payment
+);
 ```
 
 28. Muestra el id de los actores que hayan participado en más de 40 películas.
 
 ```SQL
-
+SELECT a.actor_id, COUNT(fa.film_id) AS "Peliculas"
+FROM actor AS a 
+INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+GROUP BY a.actor_id 
+HAVING COUNT(fa.film_id) > 40
+ORDER BY "Peliculas" DESC;
 ```
 
 29. Obtener todas las películas y, si están disponibles en el inventario, mostrar la cantidad disponible.
 
 ```SQL
-
+SELECT f.title, COUNT(i.inventory_id) AS "Cantidad"
+FROM film AS f
+LEFT JOIN inventory AS i ON i.film_id = f.film_id 
+GROUP BY f.title;
 ```
 
 30. Obtener los actores y el número de películas en las que ha actuado.
 
 ```SQL
-
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor", COUNT(fa.film_id) AS "Peliculas"
+FROM actor AS a 
+INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+GROUP BY "Actor"
+ORDER BY "Peliculas" DESC;
 ```
 
 31. Obtener todas las películas y mostrar los actores que han actuado en ellas, incluso si algunas películas no tienen actores asociados.
 
 ```SQL
-
+SELECT f.title, CONCAT(a.first_name, ' ', a.last_name) 
+FROM film AS f
+LEFT JOIN film_actor AS fa ON fa.film_id = f.film_id 
+LEFT JOIN actor AS a ON a.actor_id = fa.actor_id
+ORDER BY f.title ASC;
 ```
 
 32. Obtener todos los actores y mostrar las películas en las que han actuado, incluso si algunos actores no han actuado en ninguna película.
