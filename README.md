@@ -587,13 +587,38 @@ INNER JOIN peliculas_scifi AS ps ON ap.title = ps.title;
 55. Encuentra el nombre y apellido de los actores que han actuado en películas que se alquilaron después de que la película ‘Spartacus Cheaper’ se alquilara por primera vez. Ordena los resultados alfabéticamente por apellido.
 
 ```SQL
-
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor"
+FROM actor AS a 
+INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+INNER JOIN film AS f ON f.film_id = fa.film_id
+INNER JOIN inventory AS i ON i.film_id = f.film_id 
+INNER JOIN rental AS r ON r.inventory_id = i.inventory_id
+WHERE r.rental_date > (
+	SELECT MIN(r.rental_date)
+	FROM rental AS r 
+	INNER JOIN inventory AS i ON i.inventory_id = r.inventory_id
+	INNER JOIN film AS f ON f.film_id = i.film_id
+	WHERE f.title = 'SPARTACUS CHEAPER'
+)
+GROUP BY "Actor"
+ORDER BY "Actor";
 ```
 
 56. Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría ‘Music’.
 
 ```SQL
-
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor"
+FROM actor AS a
+WHERE CONCAT(a.first_name, ' ', a.last_name) NOT IN (
+	SELECT CONCAT(a.first_name, ' ', a.last_name)
+	FROM actor AS a 
+	INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+	INNER JOIN film AS f ON f.film_id = fa.film_id 
+	INNER JOIN film_category AS fc ON fc.film_id = f.film_id 
+	INNER JOIN category AS c ON c.category_id = fc.category_id
+	WHERE c.name = ('Music')
+)
+ORDER BY "Actor";
 ```
 
 57. Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.

@@ -431,25 +431,65 @@ WITH peliculas_scifi AS(
 	INNER JOIN category AS c ON c.category_id = fc.category_id
 	WHERE c.name = 'Sci-Fi'
 ), actores_peliculas AS (
-	SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor", f.title
+	SELECT CONCAT(a.last_name, ', ',a.first_name) AS "Actor", f.title
 	FROM actor AS a 
 	INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id
 	INNER JOIN film AS f ON f.film_id = fa.film_id
 )
 SELECT "Actor"
 FROM actores_peliculas AS ap
-INNER JOIN peliculas_scifi AS ps ON ap.title = ps.title;
+INNER JOIN peliculas_scifi AS ps ON ap.title = ps.title
+GROUP BY "Actor"
+ORDER BY "Actor" ASC;
 
 -- 55 Encuentra el nombre y apellido de los actores que han actuado en películas que se alquilaron después de que la película ‘Spartacus Cheaper’ se alquilara por primera vez. Ordena los resultados alfabéticamente por apellido.
 
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor"
+FROM actor AS a 
+INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+INNER JOIN film AS f ON f.film_id = fa.film_id
+INNER JOIN inventory AS i ON i.film_id = f.film_id 
+INNER JOIN rental AS r ON r.inventory_id = i.inventory_id
+WHERE r.rental_date > (
+	SELECT MIN(r.rental_date)
+	FROM rental AS r 
+	INNER JOIN inventory AS i ON i.inventory_id = r.inventory_id
+	INNER JOIN film AS f ON f.film_id = i.film_id
+	WHERE f.title = 'SPARTACUS CHEAPER'
+)
+GROUP BY "Actor"
+ORDER BY "Actor";
 
+-- 56 Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría ‘Music’.
 
+SELECT CONCAT(a.first_name, ' ', a.last_name) AS "Actor"
+FROM actor AS a
+WHERE CONCAT(a.first_name, ' ', a.last_name) NOT IN (
+	SELECT CONCAT(a.first_name, ' ', a.last_name)
+	FROM actor AS a 
+	INNER JOIN film_actor AS fa ON fa.actor_id = a.actor_id 
+	INNER JOIN film AS f ON f.film_id = fa.film_id 
+	INNER JOIN film_category AS fc ON fc.film_id = f.film_id 
+	INNER JOIN category AS c ON c.category_id = fc.category_id
+	WHERE c.name = ('Music')
+)
+ORDER BY "Actor";
 
+-- 57 Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
 
+SELECT DISTINCT f.title
+FROM film AS f 
+INNER JOIN inventory AS i ON i.film_id = f.film_id
+INNER JOIN rental AS r ON r.inventory_id = i.inventory_id
+WHERE (r.return_date - r.rental_date) > '8'
+ORDER BY f.title;
 
-
-
-
+select f.title
+from film f 
+join inventory i on i.film_id = f.film_id 
+join rental r on r.inventory_id = i.inventory_id 
+where r.return_date - r.rental_date > interval '8 days'
+GROUP BY f.title;
 
 
 
