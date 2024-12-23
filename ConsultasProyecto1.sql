@@ -484,8 +484,13 @@ JOIN rental r ON r.inventory_id = i.inventory_id
 WHERE r.return_date - r.rental_date > interval '8 days'
 ORDER BY f.title;
 
+-- 58 Encuentra el título de todas las películas que son de la misma categoría que ‘Animation’.
 
-
+SELECT f.title
+FROM film AS f 
+INNER JOIN film_category AS fc ON fc.film_id = f.film_id 
+INNER JOIN category AS c ON c.category_id = fc.category_id 
+WHERE c.name = 'Animation'
 
 
 

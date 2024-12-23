@@ -624,47 +624,94 @@ ORDER BY "Actor";
 57. Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
 
 ```SQL
-
+SELECT DISTINCT f.title
+FROM film f 
+JOIN inventory i ON i.film_id = f.film_id 
+JOIN rental r ON r.inventory_id = i.inventory_id 
+WHERE r.return_date - r.rental_date > interval '8 days'
+ORDER BY f.title;
 ```
 
 58. Encuentra el título de todas las películas que son de la misma categoría que ‘Animation’.
 
 ```SQL
-
+SELECT f.title
+FROM film AS f 
+INNER JOIN film_category AS fc ON fc.film_id = f.film_id 
+INNER JOIN category AS c ON c.category_id = fc.category_id 
+WHERE c.name = 'Animation'
 ```
 
 59. Encuentra los nombres de las películas que tienen la misma duración que la película con el título ‘Dancing Fever’. Ordena los resultados alfabéticamente por título de película.
 
 ```SQL
-
+SELECT f.title, f.length AS "Duration"
+FROM film AS f 
+WHERE f.length = (
+	SELECT length 
+	FROM film
+	WHERE title = 'DANCING FEVER'
+)
+ORDER BY title ASC;
 ```
 
 60. Encuentra los nombres de los clientes que han alquilado al menos 7 películas distintas. Ordena los resultados alfabéticamente por apellido.
 
 ```SQL
-
+WITH clientes_peliculas_distintas AS (
+	SELECT CONCAT(c.last_name, ', ',c.first_name) AS "Apellido, Nombre", f.title 
+	FROM customer AS c 
+	INNER JOIN rental AS r ON r.customer_id = c.customer_id 
+	INNER JOIN inventory AS i ON i.inventory_id = r.inventory_id 
+	INNER JOIN film AS f ON f.film_id = i.film_id
+	GROUP BY "Apellido, Nombre", f.title 
+	ORDER BY "Apellido, Nombre", f.title
+), cuenta_alquileres AS (
+	SELECT "Apellido, Nombre", COUNT(title) AS "Nº Alquileres"
+	FROM clientes_peliculas_distintas
+	GROUP BY "Apellido, Nombre"
+)
+SELECT *
+FROM cuenta_alquileres
+WHERE "Nº Alquileres" >= 7
+ORDER BY "Apellido, Nombre";
 ```
 
 61. Encuentra la cantidad total de películas alquiladas por categoría y muestra el nombre de la categoría junto con el recuento de alquileres.
 
 ```SQL
-
+SELECT c.name, COUNT(i.inventory_id ) AS "Peliculas Alquiladas"
+FROM category AS c
+INNER JOIN film_category AS fc ON fc.category_id = c.category_id 
+INNER JOIN film AS f ON f.film_id = fc.film_id 
+INNER JOIN inventory AS i ON i.film_id = f.film_id 
+GROUP BY c.name;
 ```
 
 62. Encuentra el número de películas por categoría estrenadas en 2006.
 
 ```SQL
-
+SELECT c.name, COUNT(f.film_id) AS "Peliculas Estrenadas"
+FROM category AS c 
+INNER JOIN film_category AS fc ON fc.category_id = c.category_id 
+INNER JOIN film AS f ON f.film_id = fc.film_id 
+WHERE f.release_year = 2006
+GROUP BY c.name;
 ```
 
 63. Obtén todas las combinaciones posibles de trabajadores con las tiendas que tenemos.
 
 ```SQL
-
+SELECT s.store_id, CONCAT(s2.first_name, ' ', s2.last_name) AS "Nombre Empleado"
+FROM store AS s 
+CROSS JOIN staff AS s2;
 ```
 
 64. Encuentra la cantidad total de películas alquiladas por cada cliente y muestra el ID del cliente, su nombre y apellido junto con la cantidad de películas alquiladas.
 
 ```SQL
-
+SELECT c.customer_id, c.first_name, c.last_name, COUNT(r.rental_id) AS "Peliculas Alquiladas"
+FROM customer AS c 
+INNER JOIN rental AS r ON r.customer_id = c.customer_id 
+GROUP BY c.customer_id, c.first_name, c.last_name;
 ```
