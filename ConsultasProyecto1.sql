@@ -478,19 +478,11 @@ ORDER BY "Actor";
 -- 57 Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
 
 SELECT DISTINCT f.title
-FROM film AS f 
-INNER JOIN inventory AS i ON i.film_id = f.film_id
-INNER JOIN rental AS r ON r.inventory_id = i.inventory_id
-WHERE (r.return_date - r.rental_date) > '8'
+FROM film f 
+JOIN inventory i ON i.film_id = f.film_id 
+JOIN rental r ON r.inventory_id = i.inventory_id 
+WHERE r.return_date - r.rental_date > interval '8 days'
 ORDER BY f.title;
-
-select f.title
-from film f 
-join inventory i on i.film_id = f.film_id 
-join rental r on r.inventory_id = i.inventory_id 
-where r.return_date - r.rental_date > interval '8 days'
-GROUP BY f.title;
-
 
 
 
