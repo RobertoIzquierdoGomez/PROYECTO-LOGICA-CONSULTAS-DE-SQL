@@ -38,7 +38,7 @@ El resto de tablas también guardan información relevante y se relacionan entre
 
 ## Consultas
 
-Una vez familiarizados con la BBDD procedemos a revisar los enunciados y gestionar las _Querys_. Para ello seleccionamos nuestra BBDD **ProyectoSQL** y hacemos click derecho. Seleccionamos **Editos SQL** -> **Nuevo script SQL**.
+Una vez familiarizados con la BBDD procedemos a revisar los enunciados y gestionar las _Querys_. Para ello seleccionamos nuestra BBDD **ProyectoSQL** y hacemos click derecho. Seleccionamos **Editor SQL** -> **Nuevo script SQL**.
 
 Abajo a la izquierda podemos ir al apartador de **scripts** y camiarle el nombre a **ConsultasProyecto1**. Una vez creado este _Script_ es donde vamos a realizar todas las consultas.
 

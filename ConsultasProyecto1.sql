@@ -47,21 +47,8 @@ FROM film;
 
 -- 10 Encuentra la mayor y menor duración de una película de nuestra BBDD.
 
-SELECT length AS "Duracion_Mayor_y_Menor"
-FROM film
-WHERE title IN (
-	SELECT title
-	FROM film
-	GROUP BY title
-	ORDER BY max(length) DESC
-	LIMIT 1
-) OR title IN (
-	SELECT title
-	FROM film
-	GROUP BY title
-	ORDER BY min(length) ASC
-	LIMIT 1
-);
+SELECT MAX(length) AS "Duracion_Max", MIN(length) AS "Duracion_Min" 
+FROM film;
 
 -- 11 Encuentra lo que costó el antepenúltimo alquiler ordenado por día.
 
@@ -69,7 +56,7 @@ SELECT payment.amount
 FROM payment
 JOIN rental ON rental.rental_id = payment.rental_id
 ORDER BY rental.rental_date DESC 
-OFFSET 1
+OFFSET 2
 LIMIT 1;
 
 -- 12 Encuentra el título de las películas en la tabla “film” que no sean ni ‘NC-17’ ni ‘G’ en cuanto a su clasificación.
@@ -83,6 +70,8 @@ WHERE rating NOT IN('NC-17','G');
 SELECT rating, ROUND(AVG(length),2)
 FROM film
 GROUP BY rating;
+
+
 
 -- 14 Encuentra el título de todas las películas que tengan una duración mayor a 180 minutos.
 
@@ -99,7 +88,7 @@ FROM payment;
 
 SELECT CONCAT(first_name, ' ', last_name) AS Customer_Name
 FROM customer
-ORDER BY customer_id 
+ORDER BY customer_id DESC
 LIMIT 10;
 
 -- 17 Encuentra el nombre y apellido de los actores que aparecen en la película con título ‘Egg Igby’.
@@ -116,7 +105,7 @@ WHERE Titulo = 'EGG IGBY';
 
 -- 18 Selecciona todos los nombres de las películas únicos.
 
-SELECT title
+SELECT DISTINCT title
 FROM film;
 
 -- 19 Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla “film”.
@@ -241,10 +230,13 @@ ORDER BY f.title, i.inventory_id ASC;
 
 -- 34 Encuentra los 5 clientes que más dinero se hayan gastado con nosotros.
 
-SELECT CONCAT(c.first_name, ' ', c.last_name) AS "Cliente"
+SELECT 
+    CONCAT(c.first_name, ' ', c.last_name) AS "Cliente",
+    SUM(p.amount) AS "Total_Gastado"
 FROM customer AS c
-JOIN payment AS p ON p.customer_id = c.customer_id 
-ORDER BY p.amount DESC
+JOIN payment AS p ON p.customer_id = c.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+ORDER BY "Total_Gastado" DESC
 LIMIT 5;
 
 -- 35 Selecciona todos los actores cuyo primer nombre es 'Johnny'.
